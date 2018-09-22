@@ -11,7 +11,7 @@ param (
         Mandatory=$true,
         HelpMessage="The name of a GitHub user that has access to the GitHub API."
     )][string]$userName,
-    
+
     [Parameter(
         Mandatory=$true,
         HelpMessage="The password or personal access token of the GitHub user."
@@ -22,37 +22,38 @@ param (
     [string]$backupDirectory = $(Join-Path -Path $PSScriptRoot -ChildPath $(Get-Date -UFormat "%Y-%m-%d"))
 )
 
-$startMilliseconds = (get-Date).Millisecond
-
 #
 # Clone a remote GitHub repository into a local directory.
 #
 # @see https://git-scm.com/docs/git-clone#git-clone---mirror
 #
 function Backup-GitHubRepository([string] $fullName, [string] $directory) {
-    
+
     Write-Host "Starting backup of https://github.com/${fullName} to ${directory}..." -ForegroundColor DarkYellow
 
     git clone --mirror "git@github.com:${fullName}.git" "${directory}"
-} 
+}
 
 #
 # Calculate the total repositories size in megabytes based on GitHubs 'size' property.
 #
 function Get-TotalRepositoriesSizeInMegabytes([object] $repositories) {
-    
+
     $totalSizeInKilobytes = 0
     ForEach ($repository in $repositories) {
         $totalSizeInKilobytes += $repository.size
     }
 
     $([math]::Round($totalSizeInKilobytes/1024))
-} 
+}
+
+# Measure the execution time of the backup script.
+$stopwatch = [System.Diagnostics.Stopwatch]::startNew()
 
 # Use TLS v1.2
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-# 
+#
 # Use different API endpoints for user and organisation repositories.
 #
 # @see https://developer.github.com/v3/repos/#list-organization-repositories
@@ -79,7 +80,7 @@ $requestHeaders = @{
 }
 
 # Request the GitHub API to get all repositories of a user or an organisation.
-Write-Host "Requesting '${gitHubRepositoriesUrl}'..." –foregroundcolor Yellow 
+Write-Host "Requesting '${gitHubRepositoriesUrl}'..." –foregroundcolor Yellow
 $repositories = Invoke-WebRequest -Uri $gitHubRepositoriesUrl -Headers $requestHeaders | Select-Object -ExpandProperty Content | ConvertFrom-Json
 
 # Print a userfriendly message what will happen next.
@@ -93,7 +94,6 @@ ForEach ($repository in $repositories) {
                             -Directory $(Join-Path -Path $backupDirectory -ChildPath $repository.name)
 }
 
-# Benchmark the total duration and exit with a success message.
-$durationInMilliseconds = $((get-Date).Millisecond - $startMilliseconds)
-$durationInSeconds = $($durationInMilliseconds / 1000)
-Write-Host "Successfully finished the backup in ${durationInSeconds} seconds..." –foregroundcolor Yellow 
+$stopwatch.Stop()
+$durationInSeconds = $stopwatch.Elapsed.Seconds
+Write-Host "Successfully finished the backup in ${durationInSeconds} seconds..." –foregroundcolor Yellow
