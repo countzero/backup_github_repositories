@@ -34,4 +34,4 @@ Get-Help .\backup_github_repositories.ps1 -detailed
 ```
 
 ## Known Limitations
-Currently the script does not support pagination: The maximum number of supported repositores that will be processed is 100.
+The script does not yet support pagination of the GitHub repositories API: The maximum number of supported repositories is currently 100.
