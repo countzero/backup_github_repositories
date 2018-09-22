@@ -1,21 +1,47 @@
-﻿#
-# This script backups all repositories from a GitHub user or organisation account to a local directory.
-#
+﻿<#
 
-#
-# Evaluate script parameters.
-#
-param (
+.SYNOPSIS
+Automatically backups all remote GitHub repositories.
+
+.DESCRIPTION
+This script automatically backups all remote GitHub repositories of a user or an organisation to a local directory.
+
+.PARAMETER userName
+Specifies the GitHub user name.
+
+.PARAMETER userSecret
+Specifies the GitHub user name.
+
+.PARAMETER organisationName
+Specifies the optional GitHub organisation name.
+
+.PARAMETER backupDirectory
+Overrides the default backup directory.
+
+.EXAMPLE
+.\backup_github_repositories.ps1 -userName "user" -userSecret "secret"
+
+.EXAMPLE
+.\backup_github_repositories.ps1 -userName "user" -userSecret "secret" -organisationName "organisation"
+
+.EXAMPLE
+.\backup_github_repositories.ps1 -backupDirectory "C:\myBackupDirectory"
+
+#>
+[CmdletBinding()]
+Param (
 
     [Parameter(
         Mandatory=$true,
         HelpMessage="The name of a GitHub user that has access to the GitHub API."
-    )][string]$userName,
+    )]
+    [string]$userName,
 
     [Parameter(
         Mandatory=$true,
         HelpMessage="The password or personal access token of the GitHub user."
-    )][string]$userSecret,
+    )]
+    [string]$userSecret,
 
     [string]$organisationName,
 
