@@ -10,7 +10,7 @@ This script automatically backups all remote GitHub repositories of a user or an
 Specifies the GitHub user name.
 
 .PARAMETER userSecret
-Specifies the GitHub user name.
+Specifies the password or personal access token of the GitHub user.
 
 .PARAMETER organisationName
 Specifies the optional GitHub organisation name.
