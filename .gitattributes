@@ -1,0 +1,10 @@
+# This overrides the core.autocrlf setting - http://git-scm.com/docs/gitattributes
+# Set default behaviour, in case users don't have core.autocrlf set.
+* text=auto
+
+# Declare files that will always have LF line endings on checkout.
+.gitignore text eol=lf
+.gitattributes text eol=lf
+.gitmodules text eol=lf
+*.md text eol=lf
+*.ps1 text eol=lf
