@@ -2,10 +2,10 @@
 A PowerShell script that automatically backups all GitHub repositories of a user or an organisation to a local directory.
 
 ## Installation
-Download and unpack the [latest release](https://github.com/stadtwerk/backup_github_repositories/releases/latest) to your machine.
+Download and unpack the [latest release](https://github.com/countzero/backup_github_repositories/releases/latest) to your machine.
 
 ## Usage
-Open a PowerShell console at the location of the unpacked release and execute the `backup_github_repositories.ps1`.
+Open a PowerShell console at the location of the unpacked release and execute the [./backup_github_repositories.ps1](https://github.com/countzero/backup_github_repositories/blob/master/backup_github_repositories.ps1).
 
 ## Examples
 
