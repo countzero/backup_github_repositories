@@ -87,7 +87,7 @@ $stopwatch = [System.Diagnostics.Stopwatch]::startNew()
 #
 if($organisationName) {
 
-    $gitHubRepositoriesUrl = "https://api.github.com/orgs/${organisationName}/repos?type=all"
+    $gitHubRepositoriesUrl = "https://api.github.com/orgs/${organisationName}/repos?type=all&per_page=100&page=1"
 
 } else {
 

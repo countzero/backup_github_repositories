@@ -32,3 +32,6 @@ Execute the following command to get detailed help.
 ```PowerShell
 Get-Help .\backup_github_repositories.ps1 -detailed
 ```
+
+## Known Limitations
+Currently the script does not support pagination: The maximum number of supported repositores that will be processed is 100.
