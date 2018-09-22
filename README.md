@@ -21,7 +21,7 @@ Execute the following to backup all git repositories of a GitHub organisation in
 .\backup_github_repositories.ps1 -userName "user" -userSecret "password" -organisationName "organsiation"
 ```
 
-### Backup all git repositories of a user into another directory
+### Backup all git repositories of a user into a specific directory
 Execute the following to backup all git repositories of a GitHub user into the directory `C:\myBackupDirectory` and let the script prompt for the user secret.
 ```PowerShell
 .\backup_github_repositories.ps1 -userName "user" -backupDirectory "C:\myBackupDirectory"
