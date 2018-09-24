@@ -1,5 +1,6 @@
-﻿<#
+﻿#Requires -Version 5.0
 
+<#
 .SYNOPSIS
 Automatically backups all remote GitHub repositories.
 
@@ -26,8 +27,8 @@ Overrides the default backup directory.
 
 .EXAMPLE
 .\backup_github_repositories.ps1 -backupDirectory "C:\myBackupDirectory"
-
 #>
+
 [CmdletBinding()]
 Param (
 
@@ -45,8 +46,15 @@ Param (
 
     [string]$organisationName,
 
-    [string]$backupDirectory = $(Join-Path -Path $PSScriptRoot -ChildPath $(Get-Date -UFormat "%Y-%m-%d"))
+    [string]$backupDirectory
 )
+
+# Default the backup directory to './YYYY-MM-DD'. This can
+# not be done in the Param section because $PSScriptRoot
+# will not be resolved if this script gets invoked from cmd.
+if (!$backupDirectory) {
+    $backupDirectory = $(Join-Path -Path "$PSScriptRoot" -ChildPath $(Get-Date -UFormat "%Y-%m-%d"))
+}
 
 #
 # Clone a remote GitHub repository into a local directory.
