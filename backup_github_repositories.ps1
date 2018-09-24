@@ -134,12 +134,12 @@ $requestHeaders = @{
 }
 
 # Request the GitHub API to get all repositories of a user or an organisation.
-Write-Host "Requesting '${gitHubRepositoriesUrl}'..." –foregroundcolor Yellow
+Write-Host "Requesting '${gitHubRepositoriesUrl}'..." -foregroundcolor Yellow
 $repositories = Invoke-WebRequest -Uri $gitHubRepositoriesUrl -Headers $requestHeaders | Select-Object -ExpandProperty Content | ConvertFrom-Json
 
 # Print a userfriendly message what will happen next.
 $totalSizeInMegabytes = Get-TotalRepositoriesSizeInMegabytes -repositories $repositories
-Write-Host "Cloning $($repositories.Count) repositories (~${totalSizeInMegabytes} MB) into '${backupDirectory}'..." –foregroundcolor Yellow
+Write-Host "Cloning $($repositories.Count) repositories (~${totalSizeInMegabytes} MB) into '${backupDirectory}'..." -foregroundcolor Yellow
 
 # Clone each repository into the backup directory.
 ForEach ($repository in $repositories) {
@@ -150,4 +150,4 @@ ForEach ($repository in $repositories) {
 
 $stopwatch.Stop()
 $durationInSeconds = $stopwatch.Elapsed.Seconds
-Write-Host "Successfully finished the backup in ${durationInSeconds} seconds..." –foregroundcolor Yellow
+Write-Host "Successfully finished the backup in ${durationInSeconds} seconds..." -foregroundcolor Yellow
