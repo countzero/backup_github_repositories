@@ -29,24 +29,44 @@ Overrides the default backup directory.
 .\backup_github_repositories.ps1 -backupDirectory "C:\myBackupDirectory"
 #>
 
-[CmdletBinding()]
+[CmdletBinding(
+    DefaultParameterSetName = 'SecureSecret'
+)]
 Param (
 
     [Parameter(
-        Mandatory=$true,
+        Mandatory=$True,
         HelpMessage="The name of a GitHub user that has access to the GitHub API."
     )]
-    [string]$userName,
+    [string]$username,
 
     [Parameter(
-        Mandatory=$true,
-        HelpMessage="The password or personal access token of the GitHub user."
+        Mandatory=$True,
+        HelpMessage="The password or personal access token of the GitHub user.",
+        ParameterSetName = 'SecureSecret'
+    )]
+    [Security.SecureString]${user password or personal access token},
+    [Parameter(
+        Mandatory = $True,
+        ParameterSetName = 'PlainTextSecret'
     )]
     [string]$userSecret,
 
     [string]$organisationName,
 
     [string]$backupDirectory
+)
+
+# Consolidate the user secret, either from the argument or the prompt, in a secure string format.
+if ($userSecret) {
+    $secureStringUserSecret = $userSecret | ConvertTo-SecureString -AsPlainText -Force
+} else {
+    $secureStringUserSecret = ${user password or personal access token}
+}
+
+# Convert the secure user secret string into a plain text representation.
+$plainTextUserSecret = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+    [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureStringUserSecret)
 )
 
 # Default the backup directory to './YYYY-MM-DD'. This can
@@ -107,7 +127,7 @@ if($organisationName) {
 #
 # @see https://developer.github.com/v3/auth/#basic-authentication
 #
-$basicAuthenticationCredentials = "${userName}:${userSecret}"
+$basicAuthenticationCredentials = "${username}:${plainTextUserSecret}"
 $encodedBasicAuthenticationCredentials = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($basicAuthenticationCredentials))
 $requestHeaders = @{
     Authorization = "Basic $encodedBasicAuthenticationCredentials"
