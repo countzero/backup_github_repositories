@@ -107,7 +107,6 @@ function Get-TotalRepositoriesSizeInMegabytes([object] $repositories) {
     $([math]::Round($totalSizeInKilobytes/1024))
 }
 
-
 # Measure the execution time of the backup script.
 $stopwatch = [System.Diagnostics.Stopwatch]::startNew()
 

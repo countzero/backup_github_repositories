@@ -18,7 +18,7 @@ Execute the following to backup all git repositories of a GitHub user into the s
 ### Backup all git repositores of a organisation
 Execute the following to backup all git repositories of a GitHub organisation into the subdirectory `./YYYY-MM-DD/`.
 ```PowerShell
-.\backup_github_repositories.ps1 -userName "user" -userSecret "password" -organisationName "organsiation"
+.\backup_github_repositories.ps1 -userName "user" -userSecret "password" -organisationName "organisation"
 ```
 
 ### Backup all git repositories of a user into a specific directory
@@ -32,6 +32,3 @@ Execute the following command to get detailed help.
 ```PowerShell
 Get-Help .\backup_github_repositories.ps1 -detailed
 ```
-
-## Known Limitations
-The script does not yet support pagination of the GitHub repositories API: The maximum number of supported repositories is currently 100.
