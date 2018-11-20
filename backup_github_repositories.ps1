@@ -76,6 +76,12 @@ if (!$backupDirectory) {
     $backupDirectory = $(Join-Path -Path "$PSScriptRoot" -ChildPath $(Get-Date -UFormat "%Y-%m-%d"))
 }
 
+# Log a message to the commandline.
+function Write-Message([string] $message, [string] $color = 'Yellow') {
+
+    Write-Host "${message}" -foregroundcolor $color
+}
+
 #
 # Clone a remote GitHub repository into a local directory.
 #
@@ -83,7 +89,7 @@ if (!$backupDirectory) {
 #
 function Backup-GitHubRepository([string] $fullName, [string] $directory) {
 
-    Write-Host "Starting backup of https://github.com/${fullName} to ${directory}..." -ForegroundColor DarkYellow
+    Write-Message "Starting backup of https://github.com/${fullName} to ${directory}..." 'DarkYellow'
 
     git clone --mirror "git@github.com:${fullName}.git" "${directory}"
 }
@@ -100,6 +106,7 @@ function Get-TotalRepositoriesSizeInMegabytes([object] $repositories) {
 
     $([math]::Round($totalSizeInKilobytes/1024))
 }
+
 
 # Measure the execution time of the backup script.
 $stopwatch = [System.Diagnostics.Stopwatch]::startNew()
@@ -128,18 +135,22 @@ if($organisationName) {
 # @see https://developer.github.com/v3/auth/#basic-authentication
 #
 $basicAuthenticationCredentials = "${username}:${plainTextUserSecret}"
-$encodedBasicAuthenticationCredentials = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($basicAuthenticationCredentials))
+$encodedBasicAuthenticationCredentials = [System.Convert]::ToBase64String(
+    [System.Text.Encoding]::ASCII.GetBytes($basicAuthenticationCredentials)
+)
 $requestHeaders = @{
     Authorization = "Basic $encodedBasicAuthenticationCredentials"
 }
 
 # Request the GitHub API to get all repositories of a user or an organisation.
-Write-Host "Requesting '${gitHubRepositoriesUrl}'..." -foregroundcolor Yellow
-$repositories = Invoke-WebRequest -Uri $gitHubRepositoriesUrl -Headers $requestHeaders | Select-Object -ExpandProperty Content | ConvertFrom-Json
+Write-Message "Requesting '${gitHubRepositoriesUrl}'..."
+$repositories = Invoke-WebRequest -Uri $gitHubRepositoriesUrl -Headers $requestHeaders | `
+                Select-Object -ExpandProperty Content | `
+                ConvertFrom-Json
 
 # Print a userfriendly message what will happen next.
 $totalSizeInMegabytes = Get-TotalRepositoriesSizeInMegabytes -repositories $repositories
-Write-Host "Cloning $($repositories.Count) repositories (~${totalSizeInMegabytes} MB) into '${backupDirectory}'..." -foregroundcolor Yellow
+Write-Message "Cloning $($repositories.Count) repositories (~${totalSizeInMegabytes} MB) into '${backupDirectory}'..."
 
 # Clone each repository into the backup directory.
 ForEach ($repository in $repositories) {
@@ -150,4 +161,4 @@ ForEach ($repository in $repositories) {
 
 $stopwatch.Stop()
 $durationInSeconds = $stopwatch.Elapsed.Seconds
-Write-Host "Successfully finished the backup in ${durationInSeconds} seconds..." -foregroundcolor Yellow
+Write-Message "Successfully finished the backup in ${durationInSeconds} seconds..."
