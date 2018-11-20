@@ -120,13 +120,13 @@ $stopwatch = [System.Diagnostics.Stopwatch]::startNew()
 # @see https://developer.github.com/v3/repos/#list-organization-repositories
 # @see https://developer.github.com/v3/repos/#list-your-repositories
 #
-if($organisationName) {
+if ($organisationName) {
 
-    $gitHubRepositoriesUrl = "https://api.github.com/orgs/${organisationName}/repos?type=all&per_page=100&page=1"
+    $gitHubRepositoriesUrl = "https://api.github.com/orgs/${organisationName}/repos?type=all&per_page=50"
 
 } else {
 
-    $gitHubRepositoriesUrl = "https://api.github.com/user/repos?affiliation=owner&per_page=100&page=1"
+    $gitHubRepositoriesUrl = "https://api.github.com/user/repos?affiliation=owner&per_page=50"
 }
 
 #
@@ -142,11 +142,22 @@ $requestHeaders = @{
     Authorization = "Basic $encodedBasicAuthenticationCredentials"
 }
 
-# Request the GitHub API to get all repositories of a user or an organisation.
-Write-Message "Requesting '${gitHubRepositoriesUrl}'..."
-$repositories = Invoke-WebRequest -Uri $gitHubRepositoriesUrl -Headers $requestHeaders | `
-                Select-Object -ExpandProperty Content | `
-                ConvertFrom-Json
+# Request the paginated GitHub API to get all repositories of a user or an organisation.
+$repositories = @()
+$pageNumber = 0
+Do {
+
+    $pageNumber++
+    $paginatedGitHubApiUri = "${gitHubRepositoriesUrl}&page=${pageNumber}"
+
+    Write-Message "Requesting '${paginatedGitHubApiUri}'..."
+    $paginatedRepositories = Invoke-WebRequest -Uri $paginatedGitHubApiUri -Headers $requestHeaders | `
+                             Select-Object -ExpandProperty Content | `
+                             ConvertFrom-Json
+
+    $repositories += $paginatedRepositories
+
+} Until ($paginatedRepositories.Count -eq 0)
 
 # Print a userfriendly message what will happen next.
 $totalSizeInMegabytes = Get-TotalRepositoriesSizeInMegabytes -repositories $repositories
