@@ -170,5 +170,5 @@ ForEach ($repository in $repositories) {
 }
 
 $stopwatch.Stop()
-$durationInSeconds = $stopwatch.Elapsed.Seconds
+$durationInSeconds = $stopwatch.Elapsed.TotalSeconds
 Write-Message "Successfully finished the backup in ${durationInSeconds} seconds..."
