@@ -38,7 +38,7 @@ Param (
         Mandatory=$True,
         HelpMessage="The name of a GitHub user that has access to the GitHub API."
     )]
-    [string]$username,
+    [string]$userName,
 
     [Parameter(
         Mandatory=$True,
@@ -133,7 +133,7 @@ if ($organisationName) {
 #
 # @see https://developer.github.com/v3/auth/#basic-authentication
 #
-$basicAuthenticationCredentials = "${username}:${plainTextUserSecret}"
+$basicAuthenticationCredentials = "${userName}:${plainTextUserSecret}"
 $encodedBasicAuthenticationCredentials = [System.Convert]::ToBase64String(
     [System.Text.Encoding]::ASCII.GetBytes($basicAuthenticationCredentials)
 )
