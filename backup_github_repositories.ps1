@@ -165,8 +165,9 @@ Write-Message "Cloning $($repositories.Count) repositories (~${totalSizeInMegaby
 # Clone each repository into the backup directory.
 ForEach ($repository in $repositories) {
 
+    # The repository directory is suffixed with a ".git" to indicate a bare repository.
     Backup-GitHubRepository -FullName $repository.full_name `
-                            -Directory $(Join-Path -Path $backupDirectory -ChildPath "${repository.name}.git)
+                            -Directory $(Join-Path -Path $backupDirectory -ChildPath "$($repository.name).git")
 }
 
 $stopwatch.Stop()
