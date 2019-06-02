@@ -83,13 +83,20 @@ function Write-Message([string] $message, [string] $color = 'Yellow') {
 }
 
 #
-# Clone a remote GitHub repository into a local directory.
+# Clone or fetch a remote GitHub repository into a local directory.
 #
 # @see https://git-scm.com/docs/git-clone#git-clone---mirror
 #
 function Backup-GitHubRepository([string] $fullName, [string] $directory) {
 
     Write-Message "Starting backup of https://github.com/${fullName} to ${directory}..." 'DarkYellow'
+
+    if (Test-Path "${directory}") {
+
+        git --git-dir="${directory}" fetch --all
+        git --git-dir="${directory}" fetch --tags
+        return
+    }
 
     git clone --mirror "git@github.com:${fullName}.git" "${directory}"
 }
