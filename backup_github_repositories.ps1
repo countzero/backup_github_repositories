@@ -38,7 +38,8 @@ Param (
         Mandatory=$True,
         HelpMessage="The name of a GitHub user that has access to the GitHub API."
     )]
-    [string]$userName,
+    [String]
+    $userName,
 
     [Parameter(
         Mandatory=$True,
@@ -50,14 +51,18 @@ Param (
         Mandatory = $True,
         ParameterSetName = 'PlainTextSecret'
     )]
-    [String]$userSecret,
+    [String]
+    $userSecret,
 
-    [String]$organisationName,
+    [String]
+    $organisationName,
 
-    [String]$backupDirectory,
+    [String]
+    $backupDirectory,
 
-    [ValidateRange(0,256)]
-    [Int]$maxConcurrency=2
+    [ValidateRange(1,256)]
+    [Int]
+    $maxConcurrency=8
 )
 
 # Consolidate the user secret, either from the argument or the prompt, in a secure string format.
@@ -79,35 +84,8 @@ if (!$backupDirectory) {
     $backupDirectory = $(Join-Path -Path "$PSScriptRoot" -ChildPath $(Get-Date -UFormat "%Y-%m-%d"))
 }
 
-# Log a message to the commandline.
-function Write-Message([string] $message, [string] $color = 'Yellow') {
-
-    Write-Host "${message}" -foregroundcolor $color
-}
-
-#
-# Clone or fetch a remote GitHub repository into a local directory.
-#
-# @see https://git-scm.com/docs/git-clone#git-clone---mirror
-#
-function Backup-GitHubRepository([string] $fullName, [string] $directory) {
-
-    Write-Message "Starting backup of https://github.com/${fullName} to ${directory}..." 'DarkYellow'
-
-    if (Test-Path "${directory}") {
-
-        git --git-dir="${directory}" fetch --all
-        git --git-dir="${directory}" fetch --tags
-        return
-    }
-
-    git clone --mirror "git@github.com:${fullName}.git" "${directory}"
-}
-
-#
-# Calculate the total repositories size in megabytes based on GitHubs 'size' property.
-#
-function Get-TotalRepositoriesSizeInMegabytes([object] $repositories) {
+# Calculates the total repositories size in megabytes based on GitHubs 'size' property.
+function Get-TotalRepositoriesSizeInMegabytes([Object] $repositories) {
 
     $totalSizeInKilobytes = 0
     ForEach ($repository in $repositories) {
@@ -159,7 +137,7 @@ Do {
     $pageNumber++
     $paginatedGitHubApiUri = "${gitHubRepositoriesUrl}&page=${pageNumber}"
 
-    Write-Message "Requesting '${paginatedGitHubApiUri}'..."
+    Write-Host "Requesting '${paginatedGitHubApiUri}'..." -ForegroundColor "Yellow"
     $paginatedRepositories = Invoke-WebRequest -Uri $paginatedGitHubApiUri -Headers $requestHeaders | `
                              Select-Object -ExpandProperty Content | `
                              ConvertFrom-Json
@@ -170,16 +148,68 @@ Do {
 
 # Print a userfriendly message what will happen next.
 $totalSizeInMegabytes = Get-TotalRepositoriesSizeInMegabytes -repositories $repositories
-Write-Message "Cloning $($repositories.Count) repositories (~${totalSizeInMegabytes} MB) into '${backupDirectory}'..."
+Write-Host "Cloning $($repositories.Count) repositories (~${totalSizeInMegabytes} MB) " -NoNewLine
+Write-Host "into '${backupDirectory}' with a maximum concurrency of ${maxConcurrency}:"
 
 # Clone each repository into the backup directory.
 ForEach ($repository in $repositories) {
 
-    # The repository directory is suffixed with a ".git" to indicate a bare repository.
-    Backup-GitHubRepository -FullName $repository.full_name `
-                            -Directory $(Join-Path -Path $backupDirectory -ChildPath "$($repository.name).git")
+    while ($true) {
+
+        # Handle completed jobs as soon as possible.
+        $completedJobs = $(Get-Job -State Completed | Where-Object {$_.Name.Contains("backup_github_repositories")})
+        ForEach ($job in $completedJobs) {
+            $job | Receive-Job
+            $job | Remove-Job
+        }
+
+        $concurrencyLimitIsReached = $($(Get-Job -State Running).Count -ge $maxConcurrency)
+        if ($concurrencyLimitIsReached) {
+
+            $pollingFrequencyInMilliseconds = 50
+            Start-Sleep -Milliseconds $pollingFrequencyInMilliseconds
+            continue
+        }
+
+        # Clone or fetch a remote GitHub repository into a local directory.
+        $scriptBlock = {
+
+            Param (
+                [Parameter(Mandatory=$true)]
+                [String]
+                $fullName,
+
+                [Parameter(Mandatory=$true)]
+                [String]
+                $directory
+            )
+
+            if (Test-Path "${directory}") {
+
+                git --git-dir="${directory}" fetch --quiet --all
+                git --git-dir="${directory}" fetch --quiet --tags
+                Write-Host "[${fullName}] Backup completed with git fetch strategy."
+                return
+            }
+
+            git clone --quiet --mirror "git@github.com:${fullName}.git" "${directory}"
+            Write-Host "[${fullName}] Backup completed with git clone strategy."
+        }
+
+        # Suffix the repository directory with a ".git" to indicate a bare repository.
+        $directory = $(Join-Path -Path $backupDirectory -ChildPath "$($repository.name).git")
+
+        Write-Host "[$($repository.full_name)] Starting backup to ${directory}..." -ForegroundColor "DarkYellow"
+        Start-Job $scriptBlock -Name "backup_github_repositories" `
+                               -ArgumentList $repository.full_name, $directory `
+                               | Out-Null
+        break
+    }
 }
 
+# Wait for the last jobs to complete and output their results.
+Get-Job | Receive-job -AutoRemoveJob -Wait
+
 $stopwatch.Stop()
-$durationInSeconds = $stopwatch.Elapsed.TotalSeconds
-Write-Message "Successfully finished the backup in ${durationInSeconds} seconds..."
+$durationInSeconds = [Math]::Floor([Decimal]($stopwatch.Elapsed.TotalSeconds))
+Write-Host "Successfully finished the backup in ${durationInSeconds} seconds." -ForegroundColor "Yellow"
