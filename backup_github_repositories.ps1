@@ -50,11 +50,14 @@ Param (
         Mandatory = $True,
         ParameterSetName = 'PlainTextSecret'
     )]
-    [string]$userSecret,
+    [String]$userSecret,
 
-    [string]$organisationName,
+    [String]$organisationName,
 
-    [string]$backupDirectory
+    [String]$backupDirectory,
+
+    [ValidateRange(0,256)]
+    [Int]$maxConcurrency=2
 )
 
 # Consolidate the user secret, either from the argument or the prompt, in a secure string format.
