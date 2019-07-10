@@ -27,6 +27,12 @@ Execute the following to backup all git repositories of a GitHub user into the d
 .\backup_github_repositories.ps1 -userName "user" -backupDirectory "C:\myBackupDirectory"
 ```
 
+### Backup all git repositories with a maximum concurrency of 2
+Execute the following to backup all git repositories of a GitHub user into the subdirectory `./YYYY-MM-DD/` with a maximum concurrency of 2 background jobs.
+```PowerShell
+.\backup_github_repositories.ps1 -userName "user" -backupDirectory "C:\myBackupDirectory" -maxConcurrency 2
+```
+
 ### Get detailed help
 Execute the following command to get detailed help.
 ```PowerShell
