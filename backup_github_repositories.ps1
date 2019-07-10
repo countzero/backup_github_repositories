@@ -19,6 +19,9 @@ Specifies the optional GitHub organisation name.
 .PARAMETER backupDirectory
 Overrides the default backup directory.
 
+.PARAMETER maxConcurrency
+Overrides the default concurrency of 8.
+
 .EXAMPLE
 .\backup_github_repositories.ps1 -userName "user" -userSecret "secret"
 
@@ -26,7 +29,7 @@ Overrides the default backup directory.
 .\backup_github_repositories.ps1 -userName "user" -userSecret "secret" -organisationName "organisation"
 
 .EXAMPLE
-.\backup_github_repositories.ps1 -backupDirectory "C:\myBackupDirectory"
+.\backup_github_repositories.ps1 -backupDirectory "C:\myBackupDirectory" -maxConcurrency 1
 #>
 
 [CmdletBinding(
@@ -157,7 +160,7 @@ ForEach ($repository in $repositories) {
     while ($true) {
 
         # Handle completed jobs as soon as possible.
-        $completedJobs = $(Get-Job -State Completed | Where-Object {$_.Name.Contains("backup_github_repositories")})
+        $completedJobs = $(Get-Job -State Completed)
         ForEach ($job in $completedJobs) {
             $job | Receive-Job
             $job | Remove-Job
@@ -200,9 +203,7 @@ ForEach ($repository in $repositories) {
         $directory = $(Join-Path -Path $backupDirectory -ChildPath "$($repository.name).git")
 
         Write-Host "[$($repository.full_name)] Starting backup to ${directory}..." -ForegroundColor "DarkYellow"
-        Start-Job $scriptBlock -Name "backup_github_repositories" `
-                               -ArgumentList $repository.full_name, $directory `
-                               | Out-Null
+        Start-Job $scriptBlock -ArgumentList $repository.full_name, $directory | Out-Null
         break
     }
 }
