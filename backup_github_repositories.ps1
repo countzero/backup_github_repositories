@@ -204,6 +204,11 @@ ForEach ($repository in $repositories) {
 
         Write-Host "[$($repository.full_name)] Starting backup to ${directory}..." -ForegroundColor "DarkYellow"
         Start-Job $scriptBlock -ArgumentList $repository.full_name, $directory | Out-Null
+
+        # Give the job some time to start.
+        $warmUpTimeoutInMilliseconds = 50
+        Start-Sleep -Milliseconds $warmUpTimeoutInMilliseconds
+
         break
     }
 }
