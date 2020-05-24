@@ -209,7 +209,6 @@ ForEach ($repository in $repositories) {
                 return
             }
 
-            Write-Host "git clone --quiet --mirror https://${cloneUserName}:${cloneUserSecret}@github.com/${fullName}.git"
             git clone --quiet --mirror "https://${cloneUserName}:${cloneUserSecret}@github.com/${fullName}.git" "${directory}"
             Write-Host "[${fullName}] Backup completed with git clone strategy."
         }
