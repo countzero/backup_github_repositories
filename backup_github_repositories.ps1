@@ -141,7 +141,7 @@ Do {
     $paginatedGitHubApiUri = "${gitHubRepositoriesUrl}&page=${pageNumber}"
 
     Write-Host "Requesting '${paginatedGitHubApiUri}'..." -ForegroundColor "Yellow"
-    $paginatedRepositories = Invoke-WebRequest -Uri $paginatedGitHubApiUri -Headers $requestHeaders | `
+    $paginatedRepositories = Invoke-WebRequest -Uri $paginatedGitHubApiUri -Headers $requestHeaders -UseBasicParsing | `
                              Select-Object -ExpandProperty Content | `
                              ConvertFrom-Json
 
