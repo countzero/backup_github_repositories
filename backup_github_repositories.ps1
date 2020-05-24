@@ -220,6 +220,13 @@ ForEach ($repository in $repositories) {
         Write-Host "[$($repository.full_name)] Starting backup to ${directory}..." -ForegroundColor "DarkYellow"
         Start-Job $scriptBlock -ArgumentList $repository.full_name, $directory, $userName, $userSecret | Out-Null
         
+        if ($repository.has_wiki -eq "true") {
+            $wiki_full_name = "$($repository.full_name).wiki"
+            $wiki_directory = $(Join-Path -Path $backupDirectory -ChildPath "$($repository.name).wiki.git")
+            Write-Host "[${wiki_full_name}] Starting wiki backup to ${wiki_directory}..." -ForegroundColor "DarkYellow"
+            #TODO: Wikis are enabled by default on repos, but a wiki may not exist, so an ugly error appears here when no wiki exists, but it's not fatal
+            Start-Job $scriptBlock -ArgumentList $wiki_full_name, $wiki_directory, $userName, $userSecret | Out-Null
+        }
 
         # Give the job some time to start.
         $warmUpTimeoutInMilliseconds = 50
