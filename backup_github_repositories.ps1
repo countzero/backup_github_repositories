@@ -184,7 +184,21 @@ ForEach ($repository in $repositories) {
 
                 [Parameter(Mandatory=$true)]
                 [String]
-                $directory
+                $directory,
+                
+                [Parameter(
+                    Mandatory=$True,
+                    HelpMessage="The name of a GitHub user that has access to the GitHub API."
+                )]
+                [String]
+                $cloneUserName,
+                
+                [Parameter(
+                    Mandatory=$True,
+                    HelpMessage="The name of a GitHub user that has access to the GitHub API."
+                )]
+                [String]
+                $cloneUserSecret
             )
 
             if (Test-Path "${directory}") {
@@ -195,7 +209,8 @@ ForEach ($repository in $repositories) {
                 return
             }
 
-            git clone --quiet --mirror "git@github.com:${fullName}.git" "${directory}"
+            Write-Host "git clone --quiet --mirror https://${cloneUserName}:${cloneUserSecret}@github.com/${fullName}.git"
+            git clone --quiet --mirror "https://${cloneUserName}:${cloneUserSecret}@github.com/${fullName}.git" "${directory}"
             Write-Host "[${fullName}] Backup completed with git clone strategy."
         }
 
@@ -203,7 +218,8 @@ ForEach ($repository in $repositories) {
         $directory = $(Join-Path -Path $backupDirectory -ChildPath "$($repository.name).git")
 
         Write-Host "[$($repository.full_name)] Starting backup to ${directory}..." -ForegroundColor "DarkYellow"
-        Start-Job $scriptBlock -ArgumentList $repository.full_name, $directory | Out-Null
+        Start-Job $scriptBlock -ArgumentList $repository.full_name, $directory, $userName, $userSecret | Out-Null
+        
 
         # Give the job some time to start.
         $warmUpTimeoutInMilliseconds = 50
