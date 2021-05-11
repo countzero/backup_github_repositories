@@ -12,13 +12,13 @@ Open a PowerShell console at the location of the unpacked release and execute th
 ### Backup all git repositories of a user
 Execute the following to backup all git repositories of a GitHub user into the subdirectory `./YYYY-MM-DD/`.
 ```PowerShell
-.\backup_github_repositories.ps1 -userName "user" -userSecret "password"
+.\backup_github_repositories.ps1 -userName "user" -userSecret "token"
 ```
 
 ### Backup all git repositores of a organisation
 Execute the following to backup all git repositories of a GitHub organisation into the subdirectory `./YYYY-MM-DD/`.
 ```PowerShell
-.\backup_github_repositories.ps1 -userName "user" -userSecret "password" -organisationName "organisation"
+.\backup_github_repositories.ps1 -userName "user" -userSecret "token" -organisationName "organisation"
 ```
 
 ### Backup all git repositories of a user into a specific directory

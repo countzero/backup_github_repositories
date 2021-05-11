@@ -11,7 +11,7 @@ This script automatically backups all remote GitHub repositories of a user or an
 Specifies the GitHub user name.
 
 .PARAMETER userSecret
-Specifies the password or personal access token of the GitHub user.
+Specifies the personal access token of the GitHub user.
 
 .PARAMETER organisationName
 Specifies the optional GitHub organisation name.
@@ -23,10 +23,10 @@ Overrides the default backup directory.
 Overrides the default concurrency of 8.
 
 .EXAMPLE
-.\backup_github_repositories.ps1 -userName "user" -userSecret "secret"
+.\backup_github_repositories.ps1 -userName "user" -userSecret "token"
 
 .EXAMPLE
-.\backup_github_repositories.ps1 -userName "user" -userSecret "secret" -organisationName "organisation"
+.\backup_github_repositories.ps1 -userName "user" -userSecret "token" -organisationName "organisation"
 
 .EXAMPLE
 .\backup_github_repositories.ps1 -backupDirectory "C:\myBackupDirectory" -maxConcurrency 1
@@ -46,10 +46,10 @@ Param (
 
     [Parameter(
         Mandatory=$True,
-        HelpMessage="The password or personal access token of the GitHub user.",
+        HelpMessage="The personal access token of the GitHub user.",
         ParameterSetName = 'SecureSecret'
     )]
-    [Security.SecureString]${user password or personal access token},
+    [Security.SecureString]${personal access token},
     [Parameter(
         Mandatory = $True,
         ParameterSetName = 'PlainTextSecret'
@@ -72,7 +72,7 @@ Param (
 if ($userSecret) {
     $secureStringUserSecret = $userSecret | ConvertTo-SecureString -AsPlainText -Force
 } else {
-    $secureStringUserSecret = ${user password or personal access token}
+    $secureStringUserSecret = ${personal access token}
 }
 
 # Convert the secure user secret string into a plain text representation.
