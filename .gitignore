@@ -1,6 +1,12 @@
-#
-# .gitignore
-#
+# Ignore everything inside this directory.
+*
 
-# Ignore Sublime Text files.
-*.sublime-workspace
+# But not this file.
+!.gitignore
+
+# And not the project files.
+!.gitattributes
+!backup_github_repositories.ps1
+!backup_github_repositories.sublime-project
+!README.md
+!LICENSE
